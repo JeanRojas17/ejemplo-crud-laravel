@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Producto;
 
 class Categoria extends Model
 {
@@ -15,4 +16,10 @@ class Categoria extends Model
         "descripcion",
         "status"
     ];
+
+    // Relación con productos
+    public function productos()
+    {
+        return $this->hasMany(Producto::class, 'id_categoria', 'id');
+    }
 }
