@@ -6,17 +6,40 @@ use App\Models\Producto;
 use App\Models\Categoria;
 use Illuminate\Http\Request;
 use App\Http\Requests\ProductoRequest;
+use Illuminate\Database\QueryException;
 
 class ProductoController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         //
-        $productos = Producto::orderBy('id', 'desc')->paginate(8);
-        return view('producto.index', compact('productos'));
+        $categorias = Categoria::all();
+
+        //cosnsulta base de producto
+        $query = Producto::query();
+
+        //filtro por  categoria 
+        if ($request->filled('categoria')) {
+            $query->where('id_categoria', $request->categoria);
+        }
+
+        //filtro por stock
+        if ($request->stock == 'con') {
+            $query->where('stock', '>', 0);
+        } elseif ($request->stock == 'sin') {
+            $query->where('stock', '<=', 0);
+        }
+
+        //filtro por nombre
+        if ($request->filled('buscar')) {
+            $query->where('nombre', 'like', '%' . $request->buscar . '%');
+        }
+
+        $productos = $query->orderBy('id', 'asc')->paginate(2);
+        return view('producto.index', compact('productos', 'categorias'));
     }
 
     /**
@@ -42,13 +65,13 @@ class ProductoController extends Controller
         // Procesar la imagen
         if ($request->hasFile('imagen')) {
             $imagen = $request->file('imagen');
-            $nombreImagen = time(). '.' .$imagen->getClientOriginalExtension();
+            $nombreImagen = time() . '.' . $imagen->getClientOriginalExtension();
             $imagen->move(public_path('img'), $nombreImagen);
         }
 
         $data['imagen'] = $nombreImagen;
         Producto::create($data);
-        return redirect()->route('producto.index')->with('success','Producto agregado correctamente');
+        return redirect()->route('producto.index')->with('success', 'Producto agregado correctamente');
     }
 
     /**
@@ -62,17 +85,43 @@ class ProductoController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Producto $producto)
+    public function edit($id)
     {
         //
+        $categorias = Categoria::class::orderBy('id', 'desc')
+            ->select('categorias.id', 'categorias.nombre')
+            ->get();
+
+        $producto = Producto::findOrFail($id);
+        return view('producto.edit', compact('categorias', 'producto'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Producto $producto)
+    public function update(ProductoRequest $request, $id)
     {
         //
+        $producto = Producto::findOrFail($id);
+        $data = $request->validated();
+
+        // Procesar la imagen
+        if ($request->hasFile('imagen')) {
+            if ($producto->imagen && file_exists(public_path('img/' . $producto->imagen))) {
+                // Eliminar la imagen anterior
+                unlink(public_path('img/' . $producto->imagen));
+            }
+
+            $imagen = $request->file('imagen');
+            $nombreImagen = time() . '.' . $imagen->getClientOriginalExtension();
+            $imagen->move(public_path('img'), $nombreImagen);
+        } else {
+            $nombreImagen = $producto->imagen;
+        }
+
+        $data['imagen'] = $nombreImagen;
+        $producto->update($data);
+        return redirect()->route('producto.index')->with('success', 'Producto actualizado correctamente');
     }
 
     /**
@@ -81,5 +130,16 @@ class ProductoController extends Controller
     public function destroy(Producto $producto)
     {
         //
+        try {
+            $producto->delete();
+            return redirect()->route('producto.index')->with('success', 'Producto eliminado correctamente');
+        } catch (QueryException $e) {
+            // Código de violaciones de integridad de SQL:23000
+            if ($e->getCode() === "23000") {
+                return redirect()->route('producto.index')->with('error', 'No se puede eliminar este producto');
+            }
+
+            return redirect()->route('producto.index')->with('error', 'Error inesperado');
+        }
     }
 }

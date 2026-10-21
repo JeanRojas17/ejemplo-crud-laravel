@@ -10,6 +10,30 @@ Productos
     <h2 class="titulo-tabla"> Listado de productos</h2>
 
     <nav class="nav-botones">
+        <form action="{{ route('producto.index') }}" method="GET" class="form-filtros">
+            {{-- filtro por categoria --}}
+            <select name="categoria" class="filtro-select">
+                <option value=""> Categoría </option>
+                @foreach($categorias as $categoria)
+                <option value="{{ $categoria->id }}" {{ request('categoria') == $categoria->id ? 'selected' : '' }}>
+                    {{ $categoria->nombre }}
+                </option>
+                @endforeach
+            </select>
+            {{--filtro por stock  --}}
+            <select name="stock" class="filtro-select">
+                <option value=""> Stock </option>
+                <option value="con" {{ request('stock') == 'con' ? 'selected' : '' }}>Con stock</option>
+                <option value="sin" {{ request('stock') == 'sin' ? 'selected' : '' }}>Sin stock</option>
+            </select>
+            {{-- filtro por nombre de producto --}}
+            <input type="text" name="buscar" placeholder="Buscar producto..." value="{{ request('buscar') }}" class="filtro-input">
+
+            <button type="submit" class="nav-link btn-filtrar">Filtrar</button>
+
+            {{-- BOTÓN LIMPIAR: Recarga la ruta sin parámetros --}}
+            <a href="{{ route('producto.index') }}" class="nav-link btn-limpiar">Limpiar</a>
+        </form>
 
         {{-- botones agragr producto y generar pdf --}}
         <ul class="nav-menu">
@@ -18,7 +42,7 @@ Productos
                 <a href="{{route('producto.create')}}" class="nav-link btn-agregar">Agregar Producto</a>
             </li>
             <li class="nav-item">
-                <a href="" target="_blank" class="nav-link btn-generar-pdf">Generar pdf</a>
+                <a href="{{route('pdf.productos')}}" target="_blank" class="nav-link btn-generar-pdf">Generar pdf</a>
             </li>
 
         </ul>
@@ -85,7 +109,11 @@ Productos
 
         </tbody>
     </table>
+    <div class="nav-botones">
+        {{-- eligir la plantilla de paginacion de views/vendor/paginacion --}}
+        {{ $productos->links('vendor.pagination.default') }}
 
+    </div>
     </div>
 </section>
 @endsection

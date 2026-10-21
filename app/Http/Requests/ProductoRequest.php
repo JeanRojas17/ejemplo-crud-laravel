@@ -23,14 +23,17 @@ class ProductoRequest extends FormRequest
     public function rules(): array
     {
         $rules = [
-            'nombre' => 'required|string',
-            'descripcion' => 'nullable|string',
+            'nombre' => 'required',
             'precio' => 'required|min:0|numeric',
             'precio_venta' => 'required|min:0|numeric',
             'stock' => 'required|min:0|numeric',
-            'imagen' => 'required|image|mimes:jpeg,png,jpg,gif,jfif|max:2048',
-            'id_categoria' => 'required|exists:categorias,id',
+            'imagen' => 'image|mimes:jpeg,png,jpg,jfif,webp,gif|max:2048',
+            'id_categoria' => 'required',
         ];
+
+        if ($this->isMethod('POST')) {
+            $rules['imagen'] = 'required|image|mimes:jpeg,png,jpg,jfif,webp,gif|max:2048';
+        }
 
         return $rules;
     }
@@ -39,11 +42,9 @@ class ProductoRequest extends FormRequest
     {
         return [
             'nombre.required' => 'El campo nombre es obligatorio.',
-            'id_categoria.required' => 'Debe seleccionar una categoría.',
-            'id_categoria.exists' => 'La categoría seleccionada no es válida.',
             'imagen.required' => 'La imagen es obligatoria.',
             'imagen.image' => 'El archivo debe ser una imagen.',
-            'imagen.mimes' => 'La imagen debe ser de tipo jpeg, png, jpg o gif.',
+            'imagen.mimes' => 'La imagen debe ser de tipo jpeg, png, jpg, jfif, webp o gif.',
             'imagen.max' => 'El tamaño de la imagen no puede ser mayor a 2MB.',
             'precio.required' => 'El campo precio es obligatorio.',
             'precio.min' => 'El campo precio no puede ser negativo.',

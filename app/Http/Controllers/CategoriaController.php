@@ -15,7 +15,7 @@ class CategoriaController extends Controller
     public function index()
     {
         //
-        $categorias = Categoria::orderBy('id', 'desc') -> paginate(8);
+        $categorias = Categoria::orderBy('id', 'asc') -> paginate(8);
         return view('categoria.index', compact('categorias'));
     }
 
