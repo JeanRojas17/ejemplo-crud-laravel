@@ -30,12 +30,12 @@
         <div class="element-slidebar">
             <div class="element-slidebar-btn profile">
                 <span><img src="{{asset('img/face3.png')}}" alt="avatar"></span>
-                <p>user</p>
+                <p>{{Auth::user()->name}}</p>
             </div>
             <div class="element-slidebar-content">
-                <a href="">Perfil</a>
+                <a href="{{route('profile.edit')}}">Perfil</a>
 
-                <form method="POST" action="">
+                <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <input type="submit" value="Salir" class="logout-link">
 
@@ -47,7 +47,7 @@
 
         <div class="element-slidebar-btn">
             <span><img src="{{asset('img/compras.png')}}" alt="Dashboard"></span>
-            <a href="">Dashboard</a>
+            <a href="{{route('dashboard')}}">Dashboard</a>
         </div>
 
         <!-- Categorias -->

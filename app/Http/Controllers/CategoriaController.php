@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Categoria;
 use Illuminate\Http\Request;
 use App\Http\Requests\CategoriaRequest;
+use Illuminate\Routing\Controller;
 use Illuminate\Database\QueryException;
 
 class CategoriaController extends Controller
@@ -12,10 +13,18 @@ class CategoriaController extends Controller
     /**
      * Display a listing of the resource.
      */
+    public function __construct()
+    {
+        $this->middleware('can:categoria.create')->only(['create', 'store']);
+        $this->middleware('can:categoria.index')->only('index');
+        $this->middleware('can:categoria.update')->only(['edit', 'update']);
+        $this->middleware('can:categoria.destroy')->only('destroy');
+    }
+
     public function index()
     {
         //
-        $categorias = Categoria::orderBy('id', 'asc') -> paginate(8);
+        $categorias = Categoria::orderBy('id', 'asc')->paginate(8);
         return view('categoria.index', compact('categorias'));
     }
 
@@ -34,8 +43,8 @@ class CategoriaController extends Controller
     public function store(CategoriaRequest $request)
     {
         //
-        $categoria = Categoria::create($request -> validated());
-        return redirect()->route('categoria.index')->with('success','Categoria agregada correctamente');
+        $categoria = Categoria::create($request->validated());
+        return redirect()->route('categoria.index')->with('success', 'Categoria agregada correctamente');
     }
 
     /**
@@ -64,7 +73,7 @@ class CategoriaController extends Controller
         //
         $categoria = Categoria::findOrFail($id);
         $categoria->update($request->validated());
-        return redirect()->route('categoria.index')->with('success','Categoria actualizada correctamente');
+        return redirect()->route('categoria.index')->with('success', 'Categoria actualizada correctamente');
     }
 
     /**
@@ -76,14 +85,14 @@ class CategoriaController extends Controller
         try {
             $categoria = Categoria::findOrFail($id);
             $categoria->delete();
-            return redirect()->route('categoria.index')->with('success','Categoria eliminada correctamente');
+            return redirect()->route('categoria.index')->with('success', 'Categoria eliminada correctamente');
         } catch (QueryException $e) {
             // Código de violaciones de integridad de SQL:23000
             if ($e->getCode() === "23000") {
-                return redirect()->back()->with('error','No se pueden eliminar categorias que tienen productos asociados');                
+                return redirect()->back()->with('error', 'No se pueden eliminar categorias que tienen productos asociados');
             }
 
-            return redirect()->back()->with('error','Ocurrio un error inesperado con la base de datos');
+            return redirect()->back()->with('error', 'Ocurrio un error inesperado con la base de datos');
         }
     }
 }

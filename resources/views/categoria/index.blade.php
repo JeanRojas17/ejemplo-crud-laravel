@@ -11,9 +11,13 @@ Categorias
 
     <nav class="nav-botones">
         <ul class="nav-menu">
+
+            @can('categoria.create')
             <li class="nav-item">
                 <a href="{{route('categoria.create')}}" class="nav-link btn-agregar">Agregar Categoria</a>
             </li>
+            @endcan
+
         </ul>
     </nav>
 
@@ -44,6 +48,7 @@ Categorias
                         <img src="img/edit.png" alt="">
                     </a>
 
+                    @can('categoria.destroy')
                     <form action="{{route('categoria.destroy',[$categoria->id])}}" method="POST" onsubmit="return confimarEliminacion()">
                         {{-- permite gemrar el token para enviar por post --}}
                         @csrf
@@ -51,6 +56,7 @@ Categorias
                         @method('DELETE')
                         <input type="image" src="img/delete.png"></input>
                     </form>
+                    @endcan
 
                     <script>
                         function confimarEliminacion() {
